@@ -12,7 +12,90 @@ def f(x):
 #TASCA 2: Dibuixar la funció
 #==================================================
 
-x = np.linspace(-1,4)
+x = np.linspace(-1.5,4.5)
 y = f(x)
-plt.plot(x,y)
+
+plt.figure(figsize=(10,6))
+
+plt.plot(x,y, label='$f(x)$', color='#1f77b4', linewidth=2.5)
+plt.grid()
+plt.axhline(0, color='black', linewidth=1)
+plt.axvline(0, color='black', linewidth=1)
+
+plt.xlim(-1.5, 4.5)
+plt.ylim(-100, 200)
+
+
+plt.xlim(-1.5, 4.5)
+plt.ylim(-100, 200)
+plt.title("Gràfica de la funció polinòmica i les seves arrels", fontsize=14,
+          fontweight='bold', pad=15)
+plt.xlabel("x", fontsize=12)
+plt.ylabel("f(x)", fontsize=12)
+
 plt.show()
+
+#=================================================
+# TASCA 3: escriure "newton_iter"
+#===================================================
+
+def df(x):
+    return 5*x**4 - 16*x**3 + 21*x**2 - 42*x + 6
+
+def newton_iter(x0, f, df, niter):
+    x_k = x0
+    for i in range(niter):
+        try:
+            x_new = x_k - f(x_k)/df(x_k)
+            x_k = x_new
+        except ZeroDivisionError:
+            raise ZeroDivisionError(f"Derivada nul·la trobada a x = {x_k}. El mètode de Newton no pot continuar.")
+    return x_new
+
+#==================================================
+# TASCA 4: fer servir newton amb unes x0 determinades
+#================================================
+
+x0_val = [-1, 2, 3, 2.5]
+niter = 100
+
+for x0 in x0_val:
+    xk = newton_iter(x0, f, df, niter)
+    print(f"for x0= {x0}, aproximation = {xk}")
+    
+#=====================================================
+# TASCA 5: modificar programa per calcular l'error i dibuixar la gràfica
+#===========================================================
+
+def newton_iter_modificat(x0, f, df, niter):
+    x_k = x0
+    errors = []
+    eix_x = []
+    for i in range(niter):
+        try:
+            x_new = x_k - f(x_k)/df(x_k)
+            rk = abs((x_k - x_new)/x_new)
+            x_k = x_new
+            errors.append(rk)
+            eix_x.append(i)
+        except ZeroDivisionError:
+            raise ZeroDivisionError(f"Derivada nul·la trobada a x = {x_k}. El mètode de Newton no pot continuar.")
+    return x_new, errors, eix_x
+
+for x0 in x0_val:
+    aprox, err, eix_x = newton_iter_modificat(x0, f, df, niter=10)
+    x = eix_x
+    y = np.log10(err)
+    plt.plot(x, y, 'o-', label=f'$x_0 = {x0}$')
+    
+plt.grid()
+plt.xlabel('Iteración ($k$)', fontsize=12)
+plt.ylabel('$\log_{10}(r^k)$ (Error relatiu)', fontsize=12)
+
+plt.title('Comparació de convergencia de Newton per diferents $x_0$', fontsize=14, fontweight='bold')
+plt.legend(loc='upper right', frameon=True, shadow=True)
+
+plt.show()
+
+#=====================================================
+# TASCA 6:

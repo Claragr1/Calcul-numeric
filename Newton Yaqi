@@ -1,0 +1,181 @@
+
+"""
+Sessio practica zeros de funcions
+
+10/09/2026
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+#====================================================
+# TASCA 1: evaluacio de la funcio
+#====================================================
+def f(x):
+    return x**5 - 4*x**4 + 7*x**3 - 21*x**2 + 6*x + 18
+
+def df(x):
+    return 5*x**4 - 16*x**3 + 21*x**2 - 42*x + 6
+
+#====================================================
+# TASCA 2: dibuix de la grafica de la funcio
+#====================================================
+
+x = np.linspace(-1.5, 4.5)
+y = f(x)
+
+
+# # Find exact numerical roots to mark on the graph
+# # Coefficients: x^5 - 4x^4 + 7x^3 - 21x^2 + 6x + 18
+# coeffs = [1, -4, 7, -21, 6, 18]
+# roots = np.roots(coeffs)
+# real_roots = roots[np.isreal(roots)].real
+
+plt.figure(figsize=(10, 6))
+
+plt.plot(x,y, label='$f(x)$', color='#1f77b4', linewidth=2.5)
+plt.grid()
+plt.axhline(0, color='black', linewidth=1)
+plt.axvline(0, color='black', linewidth=1)
+
+# # Highlight and label the zero crossings (roots)
+# plt.scatter(real_roots, np.zeros_like(real_roots), color='#d62728', s=80,
+#             zorder=5, label='Real Roots')
+# for root in real_roots:
+#     plt.annotate(f'{root:.3f}', (root, 0), textcoords="offset points",
+#                  xytext=(0, 10), ha='center', fontsize=10, color='#d62728',
+#                  fontweight='bold')
+
+plt.xlim(-1.5, 4.5)
+plt.ylim(-100, 200)
+plt.title("Gràfica de la funció polinòmica i les seves arrels", fontsize=14,
+          fontweight='bold', pad=15)
+plt.xlabel("x", fontsize=12)
+plt.ylabel("f(x)", fontsize=12)
+
+plt.show()
+
+#############################
+# quines aproximacions inicials semblen raonables?
+# a ull:
+# x0 = -0.75
+# x0 = 1.25
+# x0 = 3.4
+#############################
+
+#====================================================
+# TASCA 3: escriure "newton_iter"
+#====================================================
+
+def newton_iter(x0, f, df, niter):  
+    x_k = x0
+    for i in range(niter):
+        try:
+            x_new = x_k - f(x_k) / df(x_k)
+            x_k = x_new
+        except ZeroDivisionError:
+            raise ZeroDivisionError(f"Derivada nul·la trobada a x = {x_k}. El mètode de Newton no pot continuar.")
+    return x_new
+
+
+#====================================================
+# TASCA 4: fer servir newton amb unes x0 determinades
+#====================================================
+
+x0_val = [-1, 2, 3, 2.5]
+niter = 100
+
+for x0 in x0_val:
+   xk = newton_iter(x0, f, df, niter)
+   print(f"for x0={x0}, aproximation={xk}")
+
+
+#====================================================
+# TASCA 5: modificacio de la funcio per guardar
+#          l'error de les iteracions
+#====================================================
+
+def newton_iter_modificat(x0, f, df, niter):
+    x_k = x0
+    errors = []
+    eix_x = []
+    for i in range(niter):
+        try:
+            x_new = x_k - f(x_k) / df(x_k)
+            rk = abs(xk - x_new) / abs(x_new)
+            x_k = x_new
+            errors.append(rk)
+            eix_x.append(i)
+        except ZeroDivisionError:
+            raise ZeroDivisionError(f"Derivada nul·la trobada a x = {x_k}. El mètode de Newton no pot continuar.")
+    return x_new, errors, eix_x
+
+x0_val = [-1, 2, 3, 2.5]
+
+plt.figure(figsize=(10, 6))
+
+for x0 in x0_val:
+    aprox, err, eix_x = newton_iter_modificat(x0, f, df, niter=10)
+    x = eix_x
+    y = np.log10(err)
+    plt.plot(x, y, 'o-', label=f'$x_0 = {x0}$')
+
+plt.grid()
+plt.xlabel('Iteración ($k$)', fontsize=12)
+plt.ylabel('$\log_{10}(r^k)$ (Error relatiu)', fontsize=12)
+
+plt.title('Comparació de convergencia de Newton per diferents $x_0$', fontsize=14, fontweight='bold')
+plt.legend(loc='upper right', frameon=True, shadow=True)
+
+plt.show()
+
+#====================================================
+# TASCA 6: modificar la fct newton_iter i escriure newton
+#          amb criteris de convergencia
+#====================================================
+
+def newton(x0, f, df, tol_x=1e-12, tol_f=1e-12, max_iter=100):
+    x_k = x0
+    errors = []
+    residus = []
+    eix_x = []
+    try:
+        for i in range(max_iter):
+            eix_x.append(i)
+            fx = f(x_k)
+            residus.append(abs(fx))
+            x_new = x_k - fx/df(x_k)
+            rk = abs(x_k - x_new)
+            if x_new != 0:
+                rk = rk / abs(x_new)
+            errors.append(rk)
+            if abs(x_new - x_k) <= tol_x * abs(x_new) and abs(fx) <= tol_f:
+                x_k = x_new
+                break
+            x_k = x_new
+
+        # residus.append(abs(f(x_k)))
+    except ZeroDivisionError:
+        raise ZeroDivisionError(f"Derivada nul·la trobada a x = {x_k}. El mètode de Newton no pot continuar.")
+    
+    return x_k, residus, errors, eix_x
+
+# Prova de la funcio newton
+x0_val = [-1, 2, 3, 2.5]
+
+plt.figure(figsize=(10, 6))
+
+for x0 in x0_val:
+    aprox, residus, err, eix_x = newton(x0, f, df, tol_x=1e-12, tol_f=1e-12, max_iter=100)
+    res_segurs = [r if r > 0 else 1e-16 for r in residus]
+    x = eix_x
+    y = np.log10(res_segurs)
+    plt.plot(x, y, 'o-', label=f'$x_0 = {x0}$')
+
+plt.grid(True)
+plt.xlabel('Iteración ($k$)', fontsize=12)
+plt.ylabel(r'$\log_{10}(|f(x_k)|)$ (Residu)', fontsize=12)
+plt.title('Convergència dels residus de Newton per diferents $x_0$', fontsize=14, fontweight='bold')
+plt.legend(loc='upper right', frameon=True, shadow=True)
+
+plt.show()

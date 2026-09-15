@@ -1,0 +1,51 @@
+@author: clara
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+#Exercici addicional 1
+
+def f(x):
+    return x**5 - 2*x**4 - 6*x**3 + 12*x**2 + 9*x - 18
+def df(x):
+    return 5*x**4 - 8*x**3 - 18*x**2 + 24*x + 9
+
+def newton(x0, niter, f, df, tolx = 1e-12, tolf = 1e-12):
+    xk = x0
+    errors = []
+    eix_x = []
+    for i in range(niter):
+        try:
+         x_new = xk - (f(xk)/df(xk))
+         rk = abs(xk - x_new)/ abs(x_new)
+         errors.append(rk)
+         eix_x.append(i)
+         if abs(x_new - xk) <= tolx*abs(x_new) and abs(f(xk)) <= tolf:
+             xk = x_new
+             break
+         xk = x_new
+        except ZeroDivisionError:
+            raise ZeroDivisionError(f"Derivada nul·la trobada a x = {xk}. El mètode de Newton no pot continuar.")
+    return xk, errors, eix_x
+
+x0_val = [-1, 1, 3]
+
+for x0 in x0_val:
+    aprox, err, eix_x = newton(x0, 100, f, df)
+    print(f"for x0={x0}, aproximation={aprox}")
+    for e in err:
+        print(f"{e}")
+    x = eix_x
+    y = np.log10(err)
+    plt.plot(x, y, 'o-', label=f'$x_0 = {x0}$')
+
+plt.grid()    
+plt.xlabel('Iteración ($k$)', fontsize=12)
+plt.ylabel('$\log_{10}(r^k)$ (Error relatiu)', fontsize=12)
+
+plt.title('Comparació de convergencia de Newton per diferents $x_0$', fontsize=14, fontweight='bold')
+plt.legend(loc='upper right', frameon=True, shadow=True)
+plt.show()
+
+#Exercici addicional 2

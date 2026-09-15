@@ -98,4 +98,48 @@ plt.legend(loc='upper right', frameon=True, shadow=True)
 plt.show()
 
 #=====================================================
-# TASCA 6:
+# TASCA 6: modificar newton_iter i escriure Newton amb criteris de convergencia
+#=============================================================================================
+
+def newton_iter_criteris_convergencia(x0, f, df, niter, tol_x = 1e-12, tol_f = 1e-12):
+    x_k = x0
+    errors = []
+    residus = []
+    eix_x = []
+    try:
+        for i in range(niter):
+            eix_x.append(i)
+            fx = f(x_k)
+            residus.append(abs(fx))
+            x_new = x_k - f(x_k)/df(x_k)
+            rk = abs(x_k - x_new)
+            if x_new != 0:
+                rk = rk / abs(x_new)
+            errors.append(rk)
+            if abs(x_new - x_k) <= tol_x * abs(x_new) and abs(fx) <= tol_f:
+                x_k = x_new
+                break
+            x_k = x_new
+    except ZeroDivisionError:
+        raise ZeroDivisionError(f"Derivada nul·la trobada a x = {x_k}. El mètode de Newton no pot continuar.")
+    
+    return x_k, residus, errors, eix_x
+
+x0_val = [-1, 2, 3, 2.5]
+
+plt.figure(figsize=(10, 6))
+
+for x0 in x0_val:
+    aprox, residus, err, eix_x = newton_iter_criteris_convergencia(x0, f, df, 100, tol_x=1e-12, tol_f=1e-12)
+    res_segurs = [r if r > 0 else 1e-16 for r in residus]
+    x = eix_x
+    y = np.log10(res_segurs)
+    plt.plot(x, y, 'o-', label=f'$x_0 = {x0}$')
+
+plt.grid(True)
+plt.xlabel('Iteración ($k$)', fontsize=12)
+plt.ylabel(r'$\log_{10}(|f(x_k)|)$ (Residu)', fontsize=12)
+plt.title('Convergència dels residus de Newton per diferents $x_0$', fontsize=14, fontweight='bold')
+plt.legend(loc='upper right', frameon=True, shadow=True)
+
+plt.show()

@@ -3,6 +3,7 @@
 #Apartat a
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 beta = 0
 
@@ -34,4 +35,36 @@ for x in iteracions:
     print (x)
     
 #Apartat b
+def newton_iter_modificat(x0, f, df, niter):
+    x_k = x0
+    errors = []
+    eix_x = []
+    for i in range(niter):
+        try:
+            x_new = x_k - f(x_k) / df(x_k)
+            rk = np.abs(x_k - x_new) / np.abs(x_new)
+            x_k = x_new
+            errors.append(rk)
+            eix_x.append(i)
+        except ZeroDivisionError:
+            raise ZeroDivisionError(f"Derivada nul·la trobada a x = {x_k}. El mètode de Newton no pot continuar.")
+    return x_new, errors, eix_x
 
+plt.figure(figsize=(10, 6))
+
+aprox, err, eix_x = newton_iter_modificat(0.2, f, df, niter=3)
+x = eix_x
+y = np.log10(err)
+plt.plot(x, y, 'o-', label=f'$x_0 = {0.2}$')
+
+plt.grid()
+plt.xlabel('Iteración ($k$)', fontsize=12)
+plt.ylabel('$\log_{10}(r^k)$ (Error relatiu)', fontsize=12)
+
+plt.title('Gràfica error de Newton per 0.2', fontsize=14, fontweight='bold')
+
+plt.show()
+
+print ("l'error és:")
+for x in err:
+    print (x)

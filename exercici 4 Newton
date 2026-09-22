@@ -1,0 +1,37 @@
+#EXERCICI 4
+
+#Apartat a
+
+import numpy as np
+
+beta = 0
+
+def f(x):
+    return 40*np.cos(beta) - 52*(np.cos(x) + np.cos(beta - x)) + 61
+    
+def df(x):
+    return -40*np.sin(beta) +52*np.sin(x) -52*np.sin(beta - x)
+
+def newton_iter(x0, f, df, niter):
+    iteracions = []
+    x_k = x0
+    for i in range(niter):
+        try:
+            x_new = x_k - f(x_k) / df(x_k)
+            iteracions.append(x_new)
+            x_k = x_new
+        except ZeroDivisionError:
+            raise ZeroDivisionError(f"Derivada nul·la trobada a x = {x_k}. El mètode de Newton no pot continuar.")
+    return x_new, iteracions
+
+angle, iteracions = newton_iter(0.2, f, df, 3)
+
+print ("l'aproximació de l'angle es", angle)
+
+print("i les iteracions que fa Newton són:")
+
+for x in iteracions:
+    print (x)
+    
+#Apartat b
+

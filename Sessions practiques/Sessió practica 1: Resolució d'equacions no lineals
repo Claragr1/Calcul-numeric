@@ -1,0 +1,104 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+#TASCA 1
+
+def f(x):
+    return x**5 -4*x**4 + 7*x**3 - 21*x**2 + 6*x + 18
+
+#TASCA 2
+
+x_val = np.linspace(-2, 5, 400)
+y_val = f(x_val)
+plt.figure(figsize=(10, 6))
+plt.plot(x_val, y_val)
+plt.title("Gráfica de la función polinómica", fontsize = 14)
+plt.xlabel("Eje X", fontsize = 12)
+plt.ylabel("Eje Y", fontsize = 12)
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.axhline(0, color='black', linewidth=0.8)
+plt.axvline(0, color='black', linewidth=0.8)
+
+plt.show()
+
+#TASCA 3
+
+def df(x):
+    return 5*x**4 -16*x**3 + 21*x**2 - 42*x + 6
+
+def newton_iter(x0, niter, f, df):
+    x_new = x0
+    for i in range(niter):
+        try:
+            x_new = x_new - (f(x_new)/df(x_new))
+        except(ZeroDivisionError):
+            print ("Divisió per 0")
+    return x_new
+
+#TASCA 4
+
+x = [-1, 2, 3, 2.5]
+
+for x0 in x:
+    arrel = newton_iter(x0, 100, f, df)
+    print("L'aproximació de l'arrel és", arrel)
+
+#TASCA 5
+
+def newton_iter_modificat(x0, niter, f, df):
+    x_new = x0
+    error = []
+    eix_x = []
+    for i in range(niter):
+        try:
+            x_k = x_new - (f(x_new)/df(x_new))
+            error.append(abs((x_new - x_k)/x_k))
+            x_new = x_k
+            eix_x.append(i)
+        except(ZeroDivisionError):
+            print ("Divisió per 0")
+    return x_new, error, eix_x
+
+for x0 in x:
+    aprox, err, eix_x = newton_iter_modificat(x0, 10, f, df)
+    y = np.log10(err)
+    plt.plot(eix_x, y, label=f"$x_0 = {x0}$")
+    
+plt.title("Gràfica de convergència", fontsize = 14)
+plt.xticks(range(1, 11))
+plt.grid()
+plt.legend(loc='upper right', frameon=True, shadow=True)
+plt.xlabel("Iteracions", fontsize = 12)
+plt.ylabel("Logaritme de l'error relatiu", fontsize = 12)
+plt.show()
+
+#TASCA 6
+
+def newton_iter_modificat_2(x0, niter, f, df, tolx, tolf):
+    x_new = x0
+    res = []
+    eix_x = []
+    for i in range(niter):
+        try:
+            x_k = x_new - (f(x_new)/df(x_new))
+            res.append(abs(f(x_k)))
+            eix_x.append(i)
+            if (abs(x_k - x_new) <= tolx*abs(x_k) and abs(f(x_new)) <= tolf):
+                break
+            x_new = x_k
+        except(ZeroDivisionError):
+            print ("Divisió per 0")
+    return x_new, res, eix_x
+
+for x0 in x:
+    aprox, res, eix_x = newton_iter_modificat_2(x0, 100, f, df, 1e-12, 1e-12)
+    y = np.log10(res)
+    plt.plot(eix_x, y, label=f"$x_0 = {x0}$")
+    
+plt.title("Gràfica de convergència amb els residus", fontsize = 14)
+plt.xticks(range(1, 11))
+plt.grid()
+plt.legend(loc='upper right', frameon=True, shadow=True)
+plt.xlabel("Iteracions", fontsize = 12)
+plt.ylabel("Logaritme del residu", fontsize = 12)
+plt.show()

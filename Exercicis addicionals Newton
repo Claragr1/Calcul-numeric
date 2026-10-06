@@ -1,13 +1,11 @@
-@author: clara
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 
-#Exercici addicional 1
+#TASCA 1
 
 def f(x):
     return x**5 - 2*x**4 - 6*x**3 + 12*x**2 + 9*x - 18
+
 def df(x):
     return 5*x**4 - 8*x**3 - 18*x**2 + 24*x + 9
 
@@ -34,8 +32,8 @@ x0_val = [-1, 1, 3]
 for x0 in x0_val:
     aprox, err, eix_x = newton(x0, 100, f, df)
     print(f"for x0={x0}, aproximation={aprox}")
-    for e in err:
-        print(f"{e}")
+    #for e in err:
+        #print(f"{e}")
     x = eix_x
     y = np.log10(err)
     plt.plot(x, y, 'o-', label=f'$x_0 = {x0}$')
@@ -48,4 +46,67 @@ plt.title('Comparació de convergencia de Newton per diferents $x_0$', fontsize=
 plt.legend(loc='upper right', frameon=True, shadow=True)
 plt.show()
 
-#Exercici addicional 2
+#La causa de que el mètode canvii de convergencia és que tenim arrels com a 
+#minim dobles.
+
+#TASCA 2
+
+#apartat a
+
+def h(x):
+    return x**5 -4*x**4 + 7*x**3 - 21*x**2 + 6*x + 18
+
+def whittaker(x0, niter, f, m):
+    x_new = x0
+    error = []
+    eix_x = []
+    for i in range(niter):
+        try:
+            x_k = x_new - (f(x_new)/m)
+            error.append(abs((x_new - x_k)/x_k))
+            x_new = x_k
+            eix_x.append(i)
+        except(ZeroDivisionError):
+            print ("Divisió per 0")
+    return x_new, error, eix_x
+
+#apartat b
+
+m = [-26, -32, -20, 150]
+
+for i in m:
+    aprox, err, eix_x = whittaker(1, 98, h, i)
+    print ("L'aproximació amb m =", i, "dona", aprox)
+    print (err[-1])
+    y = np.log10(err)
+    plt.plot(eix_x, y, label=f"$m = {i}$")
+
+plt.title("Gràfica de convergència", fontsize = 14)
+#plt.xticks(range(1, 100))
+plt.grid()
+plt.legend(loc='upper right', frameon=True, shadow=True)
+plt.xlabel("Iteracions", fontsize = 12)
+plt.ylabel("Logaritme de l'error relatiu", fontsize = 12)
+plt.show()
+
+#Convergeix en tots els casos. La millor m és -26.
+
+#apartat c
+
+for i in m:
+    aprox, err, eix_x = whittaker(2, 74, h, i)
+    print ("L'aproximació amb m =", i, "dona", aprox)
+    print (err[-1])
+    y = np.log10(err)
+    plt.plot(eix_x, y, label=f"$m = {i}$")
+
+plt.title("Gràfica de convergència", fontsize = 14)
+#plt.xticks(range(1, 100))
+plt.grid()
+plt.legend(loc='upper right', frameon=True, shadow=True)
+plt.xlabel("Iteracions", fontsize = 12)
+plt.ylabel("Logaritme de l'error relatiu", fontsize = 12)
+plt.show()
+
+#Amb m = -26, -32 s'observa el mateix comportament. Amb les altres m convergeix
+#en menys iteracions.

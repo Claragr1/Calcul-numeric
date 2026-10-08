@@ -36,5 +36,20 @@ def Jf(x):
 #TASCA 2
 #------------------------------------------------------------------------------
 
+#TASCA 2
+
 def (f, Jf, x0, tol_f, tol_x, max_iter):
+    x_k = x0
+    error = []
+    eix_x = []
+    for i in range(max_iter):
+        x_new = x_k + np.linalg.solve(Jf(x_k), -f(x_k))
+        r_k = np.linalg.norm(x_k1 - x_k)
+        eix_x.append(i)
+        error.append(r_k)
+        if (np.linalg.norm(f(x_k)) > tol_f or r_k < tol_x):
+            break
+        x_k = x_new
+        if 
+    return eix_x, error, 
     

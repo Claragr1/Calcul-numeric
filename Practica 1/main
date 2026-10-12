@@ -1,0 +1,61 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+from mesh            import X,T,Nint,plotMesh,dofsToCoords,coordsToDofs
+from differentiation import derivadaNumerica,hessianaNumerica
+from distortion      import calculaDistorsioMalla
+
+def F(y):
+    return calculaDistorsioMalla(dofsToCoords(y), T)
+
+# gradient de F
+def DF(F, y):
+    return derivadaNumerica(F, y)
+
+# jacobiana = hessiana de F
+def HF(F, y):
+    return hessianaNumerica(F, y)
+
+# Plot initial mesh configuration
+plotMesh(X,'Malla inicial')
+
+res = calculaDistorsioMalla(X, T)
+print('Distorsio inicial: ',res)
+
+# Convert your mesh coordinates to a vector with the dofs
+y = coordsToDofs(X)
+
+def Newton_Raphson(F, DF, HF, x0, tol, max_iter):
+    x_k = x0
+    error = []
+    eix_x = []
+    for i in range(max_iter):
+        r_k = DF(F, x_k)
+        J_k = HF(F, x_k)
+        x_new = x_k + np.linalg.solve(J_k, -r_k)
+        err = np.linalg.norm(x_k - x_new)/np.linalg.norm(x_new)
+        eix_x.append(i)
+        error.append(err)
+        if (err < tol):
+            break
+        x_k = x_new
+        if (i == max_iter - 1):
+            print(f"El metode no ha convergit en {max_iter} iteracions.")
+    return eix_x, error, x_new
+
+eix_x, err, res_final = Newton_Raphson(F, DF, HF, y, 0.5e-7, 100)
+
+X = dofsToCoords(res_final)
+
+plotMesh(X,'Malla final')
+
+res = calculaDistorsioMalla(X, T)
+print('Distorsio final: ',res)
+print('Coordenades del primer node interior:', X[0,:])
+
+plt.plot(eix_x, np.log10(err), 'o-')
+plt.title("Gràfica de convergència", fontsize = 14)
+plt.xlabel("Iteracions", fontsize = 12)
+plt.ylabel("Logaritme de l'error relatiu", fontsize = 12)
+plt.grid()
+plt.show()

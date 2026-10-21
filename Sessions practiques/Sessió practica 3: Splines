@@ -56,4 +56,43 @@ no ho és, ja que té salts de discontinuitat.
 
 #Tasca 2
 
-#La funció Phi2 té valor 1 al x2 i zero a la resta.
+#La funció Phi2 té valor 1 al x2 i zero a la resta. La derivada es zero a tot arreu.
+y_base = np.zeros_like(dataY)
+d_base = np.zeros_like(der)
+y_base[2] = 1.0  # Activem nomes el valor al node 2
+spline_phi2 = scipy.interpolate.CubicHermiteSpline(dataX, y_base, d_base)
+plt.plot(x, spline_phi2(x), label=r'$\Phi_2$ (Valor=1 a x=3)')
+
+#La funció Phi_barret_3 és zero a tot arreu, pero la derivada de x3 = 1.
+y_base = np.zeros_like(dataY)
+d_base = np.zeros_like(der)
+d_base[3] = 1.0 # Activem nomes la derivada al node 3
+spline_phi_hat3 = scipy.interpolate.CubicHermiteSpline(dataX, y_base, d_base)
+plt.plot(x, spline_phi_hat3(x), label=r'$\hat{\Phi}_3$ (Derivada=1 a x=4)')
+
+plt.title("Funcions de la base d'Hermite")
+plt.legend()
+plt.grid()
+
+#Tasca 3
+
+'''
+Per poder obtenir l'spline natural cal que la segona derivada de l'spline al punt x0
+i al punt xn sigui igual a 0. És C^2.
+
+Per a fer la funció C^2 caldrà que les segones derivadas pels dos costats d'un punt coincideixin.
+'''
+
+#Tasca 4
+
+def CalculaDerivadaNatural(x, y):
+    n = len(x) - 1
+    h = np.diff(x) #h[i] = x[i+1] - x[i]
+    delta = np.diff(y)/h #delta[i] = (y[i+1] - y[i]) / h[i]
+    
+    #Construim la matriu tridiagonal A (A*d = b)
+    
+    A = np.zeros((n + 1, n + 1))                                                      
+    b = np.zeros(n + 1)
+    
+    

@@ -73,6 +73,7 @@ plt.plot(x, spline_phi_hat3(x), label=r'$\hat{\Phi}_3$ (Derivada=1 a x=4)')
 plt.title("Funcions de la base d'Hermite")
 plt.legend()
 plt.grid()
+plt.show()
 
 #Tasca 3
 
@@ -88,11 +89,82 @@ Per a fer la funció C^2 caldrà que les segones derivadas pels dos costats d'un
 def CalculaDerivadaNatural(x, y):
     n = len(x) - 1
     h = np.diff(x) #h[i] = x[i+1] - x[i]
-    delta = np.diff(y)/h #delta[i] = (y[i+1] - y[i]) / h[i]
+    t = np.diff(y) #t[i] = y[i+1] - y[i]
     
     #Construim la matriu tridiagonal A (A*d = b)
     
     A = np.zeros((n + 1, n + 1))                                                      
     b = np.zeros(n + 1)
     
+    for i in range(1, n):
+        lamda = h[i]/(h[i] + h[i-1])
+        mu = h[i-1]/(h[i] + h[i-1])
+        e = (3/(h[i] + h[i-1]))*((h[i]/h[i-1])*t[i-1] + (h[i-1]/h[i])*t[i])
+        
+        A[i, i-1] = lamda
+        A[i, i] = 2.0
+        A[i, i+1] = mu
+        b[i] = e
+    
+    #Imposem primera condicio addicional: S''(x0) = 0
+    A[0, 0] = 2.0
+    A[0, 1] = 1.0
+    b[0] = 3*t[0]/h[0]
+    
+    #Imposem segona condicio addicional: S''(xn) = 0
+    A[n, n-1] = 1.0
+    A[n, n] = 2.0
+    b[n] = 3*t[n-1]/h[n-1]
+    
+    s_der = np.linalg.solve(A, b)
+    return s_der
+
+s_natural = CalculaDerivadaNatural(dataX, dataY)
+splineCubicC2 = scipy.interpolate.CubicHermiteSpline(dataX, dataY, s_natural)
+print('Coeficients del spline natural: ', splineCubicC2.c)
+
+x = np.arange(0,7.02,0.05)
+y1 = splineCubicC2(x)
+dy1 = splineCubicC2(x, nu = 1)   # primera derivada del spline
+d2y1 = splineCubicC2(x, nu = 2)  # segona derivada del spline
+plt.plot(dataX, dataY,'k*')
+plt.plot(x,y1,label = 'S')
+plt.plot(x,dy1,label = 'dS')
+plt.plot(x,d2y1, label = 'd2S')
+plt.title('Spline cubic natural i les seves derivades')
+plt.grid()
+plt.legend()
+plt.show()
+
+'''
+Sí, té la continuitat esperada, pq com és pot veure totes les funcions són continues
+i per tant l'spline és C2.
+'''
+
+#Tasca 5
+
+# scipy calcula automàticament l'spline natural si bc_type='natural'
+splineNaturalScipy = scipy.interpolate.CubicSpline(dataX, dataY, bc_type='natural')
+
+y_manual = splineCubicC2(x)
+
+# Valors de Scipy
+y_scipy = splineNaturalScipy(x)
+
+plt.figure(figsize=(10, 6))
+plt.plot(dataX, dataY, 'ro', label='Dades')
+
+plt.plot(x, y_manual, 'b-', label='S(x) (Càlcul Manual)')
+plt.plot(x, y_scipy, 'k--', label='S(x) (Scipy CubicSpline)', dashes=(5, 5))
+
+plt.title('Spline Cúbic Natural (Manual vs Scipy)')
+plt.xlabel('x')
+plt.grid()
+plt.legend()
+plt.show()
+
+'''
+Tal i com es pot veure a la gràfica donen el mateix spline, per tant, hem fet 
+correctament l'apartat anterior.
+'''    
     

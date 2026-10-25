@@ -1,0 +1,253 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from numpy.polynomial import Polynomial, legendre, chebyshev
+from numpy.polynomial.polynomial import polymul, polyval
+# import scipy 
+from scipy import integrate
+
+
+# Probem settings
+a = -1
+b = 1
+def f(x):
+    return 1/(1+25*(x**2))
+
+
+
+#------------------------------------------------------------
+# Exemple: aproximem un conjunt de numPts punts (dataX, dataY)
+# mitjançant un polinomi i amb el criteri de mínims quadrats
+#------------------------------------------------------------
+numPts = 101
+degree = 2
+dataX = np.linspace(-1,1, numPts)
+dataY = f(dataX)
+
+# Obtenim els coeficients del polinomi i l'avaluem en els punts que fem servir per dibuixar
+poly = Polynomial.fit(dataX,dataY,degree)
+xx = np.linspace(-1,1, 101)
+yy = poly(xx)
+
+# Representem gràficament els resultats
+plt.plot(dataX, dataY, 'k', label = 'f(x) = 1/(1+25x^2)')
+plt.plot(xx, yy, label='grau = {}'.format(degree))
+plt.title('Polinomi mínims quadrats')
+plt.legend()
+plt.show()
+
+# I calculem l'error de l'aproximació
+aproxY = poly(dataX)
+E = np.sqrt(np.sum( (dataY - aproxY)**2))
+func = lambda x: (f(x) - poly(x))**2
+# r = np.sqrt(scipy.integrate.quad(func, a, b))
+r = np.sqrt(integrate.quad(func, a, b))
+print('\nMínims quadrats amb ' + str(numPts) + ' punts i un polinomi de grau ' + str(degree))
+print('E = ' + str(E) + ', int(res(x)) = ' + str(r[0]))
+
+
+# p2 = np.polynomial.legendre.leg2poly([0,0,1])
+# p3 = np.polynomial.legendre.leg2poly([0,0,0,1])
+# print('Coef. del polinomi de Legendre de grau 2: ',p2)
+# print('Coef. del polinomi de Legendre de grau 3: ',p3)
+# # Calculem els coeficients del polinomi p2*p2
+# prod = polymul(p2, p2)
+# # i fem servir la funció Polynomial per convertir-lo en una funció polinòmica
+# func = lambda x: Polynomial(prod)(x)
+# # La funció scipy.integrate.quad aproxima integrals definides
+# # (el resultat és una tupla amb el valor de la integral i una estimació de l'error)
+# res = scipy.integrate.quad(func, a, b)
+# print('<p2,p2> = ', res[0])
+# prod = polymul(p2, p3)
+# func = lambda x: Polynomial(prod)(x)
+# res = scipy.integrate.quad(func, a, b)
+# print('<p2,p3> = ', res[0])
+
+
+# p1 = np.polynomial.chebyshev.cheb2poly([0,1])
+# p4 = np.polynomial.chebyshev.cheb2poly([0,0,0,1])
+# print('Coef. del polinomi de Chebyshev de grau 1: ',p1)
+# print('Coef. del polinomi de Chebyshev de grau 4: ',p4)
+# prod = polymul(p1, p1)
+# # En aquest cas multipliquem el producte de polinomis pel pes (1 / sqrt(1+x^2))
+# # per poder definir correctament el producte escalar
+# func = lambda x: Polynomial(prod)(x) * (1/np.sqrt((1 - x**2)))
+# res = scipy.integrate.quad(func, a, b)
+# print('<p1,p1> = ', res[0])
+# prod = polymul(p1, p4)
+# func = lambda x: Polynomial(prod)(x) * (1/np.sqrt((1 - x**2)))
+# res = scipy.integrate.quad(func, a, b)
+# print('<p1,p4> = ', res[0])
+
+#Tasca 1
+
+numPts = 101
+degree = [2, 4, 6, 8, 10]
+dataX = np.linspace(-1,1, numPts)
+dataY = f(dataX)
+
+for deg in degree:
+    poly = Polynomial.fit(dataX,dataY,deg)
+    xx = np.linspace(-1,1, 101)
+    yy = poly(xx)
+    plt.plot(xx, yy, label='grau = {}'.format(deg))
+    
+    aproxY = poly(dataX)
+    E = np.sqrt(np.sum( (dataY - aproxY)**2))
+    func = lambda x: (f(x) - poly(x))**2
+    r = np.sqrt(integrate.quad(func, a, b))
+    print('\nMínims quadrats amb ' + str(numPts) + ' punts i un polinomi de grau ' + str(deg))
+    print('E = ' + str(E) + ', int(res(x)) = ' + str(r[0]))
+    
+plt.plot(dataX, dataY, 'k', label = 'f(x) = 1/(1+25x^2)')
+plt.title('Polinomi mínims quadrats')
+plt.legend()
+plt.grid()
+plt.show()
+
+'''
+Tant l'error com el residu disminueixen quan el grau augmenta. Sí, és raonable
+pensar que funcionarà igual per qualsevol funció i interval, ja que aquest mètode
+minimitza l'error.
+'''
+
+#Tasca 2
+
+'''                                                                               
+amb degree + 1 = numPts, estem forçant a que el nostre polinomi passi per                  
+exactament degree + 1 punts de la funció, interpolant-lo.                         
+''' 
+
+degree = [2, 4, 6, 8, 10]
+
+for deg in degree:
+    numPts = deg + 1
+    dataX = np.linspace(-1,1, numPts)
+    dataY = f(dataX)
+    poly = Polynomial.fit(dataX, dataY ,deg)
+    xx = np.linspace(-1,1, 101)
+    yy = poly(xx)
+    plt.plot(xx, yy, label='grau = {}'.format(deg))
+    
+    aproxY = poly(dataX)
+    E = np.sqrt(np.sum( (dataY - aproxY)**2))
+    func = lambda x: (f(x) - poly(x))**2
+    r = np.sqrt(integrate.quad(func, a, b))
+    print('\nMínims quadrats amb ' + str(numPts) + ' punts i un polinomi de grau ' + str(deg))
+    print('E = ' + str(E) + ', int(res(x)) = ' + str(r[0]))
+
+numPts = 101
+dataX = np.linspace(-1,1, numPts)
+dataY = f(dataX)  
+  
+plt.plot(dataX, dataY, 'k', label = 'f(x) = 1/(1+25x^2)')
+plt.title('Polinomi interpolador per mínims quadrats')
+plt.legend()
+plt.grid()
+plt.show()
+
+#Tasca 3
+
+#Apartat a
+'''
+Equacions normals amb base ortogonal
+Si fem servir una base de polinomis ortogonals {\phi_0, \phi_1, ..., \phi_m}, 
+el producte escalar entre polinomis diferents és zero: <\phi_i, \phi_j> = 0 
+per a i != j.
+Això fa que la matriu del sistema d'equacions normals esdevingui una matriu 
+diagonal. Així, els coeficients c_j es poden calcular directament i de forma 
+independent com:
+c_j = <f, \phi_j> / <\phi_j, \phi_j>
+Avantatges:
+  1. No cal resoldre cap sistema lineal (estalvi computacional).
+  2. Si s'augmenta el grau del polinomi a m+1, els coeficients anteriors
+     c_0, ..., c_m no canvien; només cal calcular el nou c_{m+1}.
+'''
+
+#Apartat b
+
+# Producte escalar: <f, g> = int_{-1}^1 f(x)g(x) dx
+print("\n--- APROXIMACIÓ CONTÍNUA AMB LEGENDRE ---")
+plt.figure(figsize=(10, 5))
+plt.plot(xx, f(xx), 'k--', label='f(x)')
+
+graus = [2, 4, 6, 8, 10]
+for m in graus:
+    c_leg = np.zeros(m + 1)
+    for j in range(m + 1):
+        # Definim el polinomi de Legendre de grau j
+        Pj = legendre.Legendre.basis(j)
+        
+        # Numerador: <f, P_j>
+        func_num = lambda x: f(x) * Pj(x)
+        num_val, _ = integrate.quad(func_num, a, b)
+        
+        # Denominador: <P_j, P_j> = 2 / (2j + 1) per Legendre
+        #den_val = 2.0 / (2 * j + 1) (també ho podriem fer d'aquesta manera)
+        func_den = lambda x: Pj(x) * Pj(x)
+        den_val, _ = integrate.quad(func_den, a, b)
+        
+        c_leg[j] = num_val / den_val
+        
+    # Reconstruïm el polinomi aproximat
+    poly_leg = legendre.Legendre(c_leg)
+    plt.plot(xx, poly_leg(xx), label=f'Grau {m}')
+    
+    # Calculem el residu continu
+    func_res = lambda x: (f(x) - poly_leg(x))**2
+    r_val, _ = integrate.quad(func_res, a, b)
+    print(f"Legendre Grau {m}: Residu continu r = {np.sqrt(r_val):.4e}")
+
+plt.title('Mínims quadrats continus (Legendre)')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Els resultats d'aquesta aproximació s'assemblen moltíssim a l'aproximació de 
+# mínims quadrats discrets de l'exercici 1. Al tenir una integral numèrica 
+# contínua (equivalent a un nombre de punts discret n -> \infty), elimina 
+# completament les oscil·lacions i proveeix l'aproximació polinòmica teòricament 
+# òptima respecte a la norma L^2 habitual. 
+
+#Apartat c
+
+# Producte escalar amb pes: <f, g> = int_{-1}^1 [f(x)g(x) / sqrt(1 - x^2)] dx
+print("\n--- APROXIMACIÓ CONTÍNUA AMB TXEBIXOV ---")
+plt.figure(figsize=(10, 5))
+plt.plot(xx, f(xx), 'k--', label='f(x)')
+
+for m in graus:
+    c_cheb = np.zeros(m + 1)
+    for j in range(m + 1):
+        Tj = chebyshev.Chebyshev.basis(j)
+        
+        # Numerador: <f, T_j> amb funció de pes
+        func_num = lambda x: (f(x) * Tj(x)) / np.sqrt(1 - x**2)
+        num_val, _ = integrate.quad(func_num, a, b)
+        
+        # Denominador: <T_j, T_j> és pi si j=0, i pi/2 si j>0
+        #den_val = np.pi if j == 0 else np.pi / 2.0 (també es pot fer d'aquesta forma)
+        func_den = lambda x: (Tj(x) * Tj(x)) / np.sqrt(1 - x**2)
+        den_val, _ = integrate.quad(func_den, a, b)
+        
+        c_cheb[j] = num_val / den_val
+        
+    poly_cheb = chebyshev.Chebyshev(c_cheb)
+    plt.plot(xx, poly_cheb(xx), label=f'Grau {m}')
+    
+    # Residu (calculem l'error quadrat mitjà sense el pes per comparar amb l'apartat B)
+    func_res = lambda x: (f(x) - poly_cheb(x))**2
+    r_val, _ = integrate.quad(func_res, a, b)
+    print(f"Txebixov Grau {m}: Residu continu r = {np.sqrt(r_val):.4e}")
+
+plt.title('Mínims quadrats continus (Txebixov)')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+# Els resultats també són excel·lents i no pateixen l'efecte de Runge. 
+# A diferència de Legendre, el producte escalar de Txebixov dóna més pes als 
+# extrems de l'interval a causa del denominador 1 / sqrt{1 - x^2} del seu pes. 
+# Això fa que, visualment, l'error es distribueixi de forma més equitativa al 
+# llarg de tot el domini [-1, 1], minimitzant encara més els errors màxims als 
+# extrems.
